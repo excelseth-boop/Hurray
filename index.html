@@ -3,32 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Hurray &mdash; Score Tracker</title>
-<meta name="theme-color" content="#0B3D2E">
+<title>Hurray! Score Master</title>
+<meta name="theme-color" content="#F3F4F8">
 <meta name="description" content="Offline score tracker for the Hurray card game">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Hurray">
 
 <style>
   :root{
-    --felt-dark:#0B3D2E;
-    --felt:#0F4536;
-    --felt-light:#175C43;
-    --felt-lighter:#1F6E51;
-    --gold:#D4AF37;
-    --gold-dim:#A98A2C;
-    --cream:#F3ECD9;
-    --muted:#9FB8AC;
-    --red:#C0435A;
-    --red-dim:#8C3245;
-    --orange:#D68A3F;
-    --green-pos:#6FCF97;
-    --line: rgba(212,175,55,0.25);
-    --radius: 16px;
+    --bg:#F2F3F9;
+    --card:#FFFFFF;
+    --card-border:#ECEDF5;
+    --ink:#14162B;
+    --muted:#8A8FA3;
+    --primary:#5B4FE9;
+    --primary-dark:#4338CA;
+    --primary-tint:#EAE8FD;
+    --pos:#22B573;
+    --neg:#F0475C;
+    --orange:#F0A23A;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -37,20 +34,14 @@
 
   html, body {
     margin:0; padding:0; height:100%;
-    background: var(--felt-dark);
-    color: var(--cream);
+    background: var(--bg);
+    color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
   }
 
-  body{
-    background-image:
-      radial-gradient(circle at 15% 8%, rgba(212,175,55,0.07), transparent 40%),
-      radial-gradient(circle at 90% 90%, rgba(212,175,55,0.05), transparent 45%);
-    padding-top: var(--safe-top);
-    padding-bottom: var(--safe-bottom);
-  }
+  body{ padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
 
   input, select, button { font-family: inherit; font-size: 16px; }
 
@@ -58,42 +49,23 @@
 
   /* ---------- Header ---------- */
   .topbar{
-    display:flex; align-items:center; justify-content:space-between;
-    padding: 18px 18px 10px 18px;
+    display:flex; align-items:flex-start; justify-content:space-between;
+    padding: 14px 18px 8px 18px;
   }
-  .brand{ display:flex; align-items:center; gap:10px; }
-  .brand-chip{
-    width:34px; height:34px; border-radius:50%;
-    background: var(--felt-light);
-    border: 2px solid var(--gold);
-    display:flex; align-items:center; justify-content:center;
-    font-weight:800; color: var(--gold); font-size:15px;
-    flex-shrink:0;
-  }
+  .brand{ flex:1; text-align:center; }
   .brand-name{
-    font-size: 20px; font-weight: 800; letter-spacing: 0.06em;
-    text-transform: uppercase; color: var(--cream);
+    font-size: 28px; font-weight: 900; font-style: italic; letter-spacing: -0.01em;
+    color: var(--primary); line-height:1;
   }
-  .brand-sub{ font-size:11px; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; margin-top:1px;}
-  .icon-btn{
-    background: var(--felt); border: 1px solid var(--line);
-    color: var(--cream); width:38px; height:38px; border-radius:10px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:17px; cursor:pointer;
+  .brand-sub{ font-size:11px; color:var(--muted); letter-spacing:0.16em; text-transform:uppercase; margin-top:3px; font-weight:700;}
+  .menu-btn{
+    background: transparent; border:none; color: var(--ink);
+    width:38px; height:38px; display:flex; align-items:center; justify-content:center;
+    font-size:22px; cursor:pointer; flex-shrink:0; margin-left:-38px;
   }
-  .icon-btn:active{ background: var(--felt-light); }
-  .topbar-actions{ display:flex; gap:8px; }
+  .menu-spacer{ width:38px; flex-shrink:0; }
 
-  .suit-divider{
-    display:flex; align-items:center; gap:10px;
-    padding: 2px 18px 14px 18px; color: var(--gold-dim);
-    font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
-  }
-  .suit-divider .line{ flex:1; height:1px; background: var(--line); }
-  .suit-divider .marks{ letter-spacing:4px; font-size:11px; opacity:0.8; flex-shrink:0;}
-  .suit-divider .rlabel{ flex-shrink:0; white-space:nowrap; }
-
-  main{ flex:1; padding: 0 18px 100px 18px; }
+  main{ flex:1; padding: 0 16px calc(100px + var(--safe-bottom)) 16px; }
 
   .screen{ display:none; }
   .screen.active{ display:block; animation: fade .25s ease; }
@@ -101,216 +73,248 @@
 
   /* ---------- Cards ---------- */
   .card{
-    background: var(--felt);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 18px;
-    margin-bottom: 14px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 10px rgba(20,22,43,0.04);
   }
+  .card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;}
   .card h2{
-    margin:0 0 4px 0; font-size:13px; letter-spacing:0.1em; text-transform:uppercase;
-    color: var(--gold); font-weight:700;
+    margin:0 0 4px 0; font-size:12.5px; letter-spacing:0.1em; text-transform:uppercase;
+    color: var(--ink); font-weight:800;
   }
   .card p.hint{ margin:2px 0 14px 0; font-size:13px; color:var(--muted); line-height:1.5;}
+  .icon-mini{
+    background: var(--primary-tint); border:none; color: var(--primary);
+    width:32px; height:32px; border-radius:50%; font-size:15px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
 
-  label{ display:block; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; margin: 12px 0 6px 0;}
+  label{ display:block; font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; font-weight:700; margin: 12px 0 6px 0;}
   label:first-of-type{ margin-top:0;}
 
   input[type="text"], input[type="number"], select{
-    width:100%; padding: 12px 14px; border-radius: 10px;
-    border: 1px solid var(--line); background: var(--felt-dark);
-    color: var(--cream); outline:none;
+    width:100%; padding: 13px 14px; border-radius: 12px;
+    border: 1.5px solid var(--card-border); background: #FAFAFD;
+    color: var(--ink); outline:none; font-weight:600;
   }
-  input::placeholder{ color: #5f7a6e; }
-  input:focus, select:focus{ border-color: var(--gold); }
+  input::placeholder{ color: #B7BACB; font-weight:500; }
+  input:focus, select:focus{ border-color: var(--primary); }
 
   .row{ display:flex; gap:10px; }
   .row > *{ flex:1; }
 
   .stepper{ display:flex; align-items:center; gap:12px; }
   .stepper button{
-    width:44px; height:44px; border-radius:10px; border:1px solid var(--line);
-    background: var(--felt-dark); color: var(--gold); font-size:20px; font-weight:700;
+    width:44px; height:44px; border-radius:14px; border:none;
+    background: var(--primary-tint); color: var(--primary); font-size:20px; font-weight:800;
   }
   .stepper .count{
-    flex:1; text-align:center; font-size:26px; font-weight:800; color:var(--cream);
+    flex:1; text-align:center; font-size:28px; font-weight:900; color:var(--ink);
     font-variant-numeric: tabular-nums;
   }
 
   .name-inputs .name-row{ display:flex; align-items:center; gap:8px; margin-bottom:8px;}
   .name-inputs .seat-no{
-    width:26px; text-align:center; font-size:12px; color: var(--gold-dim); font-weight:700; flex-shrink:0;
+    width:24px; text-align:center; font-size:12px; color: var(--primary); font-weight:800; flex-shrink:0;
   }
 
   .btn{
     display:block; width:100%; text-align:center;
-    padding: 14px 16px; border-radius: 12px; border: none;
-    font-weight:800; letter-spacing:0.03em; font-size:15px;
+    padding: 16px 16px; border-radius: 999px; border: none;
+    font-weight:800; letter-spacing:0.04em; font-size:15px;
     cursor:pointer; text-transform: uppercase;
   }
-  .btn-primary{ background: var(--gold); color: #1a1305; }
-  .btn-primary:active{ background: var(--gold-dim); }
-  .btn-secondary{ background: var(--felt-light); color: var(--cream); border:1px solid var(--line); }
-  .btn-secondary:active{ background: var(--felt-lighter); }
-  .btn-danger{ background: transparent; color: var(--red); border: 1px solid var(--red-dim); }
-  .btn-danger:active{ background: rgba(192,67,90,0.12); }
-  .btn-ghost{ background: transparent; color: var(--muted); border: 1px dashed var(--line); }
+  .btn-primary{ background: var(--primary); color: #fff; }
+  .btn-primary:active{ background: var(--primary-dark); }
+  .btn-dark{ background: var(--ink); color: #fff; }
+  .btn-dark:active{ background: #000; }
+  .btn-secondary{ background: var(--primary-tint); color: var(--primary); }
+  .btn-secondary:active{ background: #DCD9FB; }
+  .btn-danger{ background: #FDEBEC; color: var(--neg); }
+  .btn-danger:active{ background: #FBD9DB; }
+  .btn-ghost{ background: transparent; color: var(--muted); border: 1.5px dashed var(--card-border); }
 
-  .btn-row{ display:flex; gap:10px; margin-bottom:14px; }
-  .btn-row .btn{ margin-bottom:0; }
-  .btn-row .btn-secondary{ flex: 0 0 34%; }
-  .btn-row .btn-primary{ flex:1; }
+  .fixed-bottom{
+    position:fixed; left:0; right:0; bottom:0; z-index:30;
+    padding: 12px 18px calc(16px + var(--safe-bottom)) 18px;
+    background: linear-gradient(to top, var(--bg) 60%, rgba(242,243,249,0));
+  }
+  .fixed-bottom .inner{ max-width:560px; margin:0 auto; }
 
-  /* ---------- Dealer banner ---------- */
+  /* ---------- Dealer / Round banner ---------- */
   .dealer-banner{
-    display:flex; align-items:center; gap:12px;
-    background: linear-gradient(135deg, var(--felt-light), var(--felt));
-    border: 1px solid var(--gold-dim);
-    border-radius: var(--radius);
-    padding: 14px 16px; margin-bottom:14px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 22px;
+    padding: 16px 18px;
+    margin-bottom:6px;
+    display:flex; align-items:flex-start; justify-content:space-between;
+    box-shadow: 0 10px 24px rgba(91,79,233,0.28);
   }
-  .dealer-chip{
-    width:46px; height:46px; border-radius:50%; flex-shrink:0;
-    background: var(--felt-dark); border:2px solid var(--gold);
-    display:flex; align-items:center; justify-content:center;
-    font-weight:800; color:var(--gold); font-size:17px;
-  }
-  .dealer-text .label{ font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted);}
-  .dealer-text .value{ font-size:17px; font-weight:800; color:var(--cream); margin-top:1px;}
-  .dealer-text .sub{ font-size:12px; color: var(--gold-dim); margin-top:2px;}
+  .db-label{ font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color: rgba(255,255,255,0.72); font-weight:700; margin-bottom:4px;}
+  .db-dealer .value{ font-size:24px; font-weight:900; color:#fff; line-height:1; }
+  .db-round{ text-align:right; }
+  .db-round .value{ font-size:24px; font-weight:900; color:#fff; line-height:1; }
+  .db-sub{ font-size:11.5px; color: var(--muted); margin-top:6px; font-weight:600; }
 
+  /* ---------- Status line ---------- */
   .status-line{
-    background: var(--felt-dark); border:1px solid var(--line);
-    border-radius: 12px; padding: 12px 14px; margin-bottom:14px;
-    font-size:13px; color: var(--cream); line-height:1.5;
+    background: var(--primary-tint); border-radius: 12px; padding: 10px 12px; margin-bottom:10px;
+    font-size:12.5px; color: var(--primary-dark); line-height:1.45; font-weight:600;
   }
-  .status-line b{ color: var(--gold); }
-  .status-line.muted{ color: var(--muted); }
+  .status-line.muted{ background: #F4F4F8; color: var(--muted); }
+  .status-line b{ font-weight:800; }
 
-  /* ---------- Player rows: manual entry ---------- */
+  /* ---------- Player entry rows ---------- */
   .player-card-row{
-    background: var(--felt-dark); border: 1px solid var(--line);
-    border-radius: 14px; padding: 12px; margin-bottom:10px;
+    background: #FAFAFD; border: 1.5px solid var(--card-border);
+    border-radius: 14px; padding: 9px 10px; margin-bottom:6px;
   }
-  .player-card-row.winner{ border-color: var(--gold); background: rgba(212,175,55,0.08); }
-  .prow-head{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .player-card-row.winner{ border-color: var(--pos); background: #EEFBF4; }
+  .prow-head{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
   .avatar{
-    width:34px; height:34px; border-radius:50%; flex-shrink:0;
-    background: var(--felt-light); display:flex; align-items:center; justify-content:center;
-    font-weight:800; font-size:13px; color:var(--cream); border:1px solid var(--line);
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    background: var(--primary-tint); display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:11.5px; color:var(--primary);
   }
-  .player-card-row.winner .avatar{ background: var(--gold); color:#1a1305; border-color:var(--gold); }
-  .prow-name{ flex:1; min-width:0; font-weight:700; font-size:15px; color:var(--cream); display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+  .player-card-row.winner .avatar{ background: var(--pos); color:#fff; }
+  .prow-name{ flex:1; min-width:0; font-weight:800; font-size:14px; color:var(--ink); display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
   .badge{
-    font-size:10px; text-transform:uppercase; letter-spacing:0.06em;
-    padding:2px 6px; border-radius:5px; font-weight:700;
+    font-size:9px; text-transform:uppercase; letter-spacing:0.06em;
+    padding:2px 6px; border-radius:6px; font-weight:800;
   }
-  .badge-dealer{ background: var(--gold); color:#1a1305; }
-  .badge-winner{ background: var(--green-pos); color:#0a2c1c; }
-  .badge-early{ background: var(--orange); color:#2b1a06; }
-  .badge-late{ background: var(--red); color:#2b0a10; }
+  .badge-dealer{ background: var(--primary); color:#fff; }
+  .badge-winner{ background: var(--pos); color:#fff; }
 
-  .prow-controls{ display:flex; flex-direction:column; gap:8px; }
-  .prow-line{ display:flex; align-items:center; gap:8px; }
-  .points-input{ flex:1; min-width:0; text-align:center; font-weight:700; font-variant-numeric: tabular-nums; }
+  .prow-controls{ display:flex; flex-direction:column; gap:6px; }
+  .prow-line{ display:flex; align-items:center; gap:6px; }
+  .points-input{ flex:1; min-width:0; text-align:center; font-weight:800; font-variant-numeric: tabular-nums; padding: 10px 12px; }
   .mark-win-btn{
-    padding:11px 14px; border-radius:9px; border:1px solid var(--gold-dim);
-    background: transparent; color: var(--gold); font-size:12px; font-weight:800;
+    padding:10px 14px; border-radius:10px; border:none;
+    background: var(--primary); color: #fff; font-size:11.5px; font-weight:800;
     text-transform:uppercase; flex-shrink:0; white-space:nowrap;
   }
-  .mark-win-btn:active{ background: rgba(212,175,55,0.12); }
-  .winner-summary{ flex:1; font-size:14px; color: var(--green-pos); font-weight:800; }
+  .mark-win-btn:active{ background: var(--primary-dark); }
+  .winner-summary{ flex:1; font-size:13px; color: var(--pos); font-weight:800; }
   .unmark-btn{
-    padding:9px 12px; border-radius:9px; border:1px solid var(--line);
-    background: var(--felt); color: var(--muted); font-size:11px; font-weight:700;
+    padding:9px 11px; border-radius:9px; border:none;
+    background:#fff; color: var(--muted); font-size:10.5px; font-weight:700;
     text-transform:uppercase; flex-shrink:0;
   }
-  .quit-tag-group{ display:flex; gap:6px; }
+  .quit-tag-group{ display:flex; gap:5px; }
   .quit-tag-btn{
-    flex:1; padding:8px 4px; border-radius:8px; border:1px solid var(--line);
-    background: var(--felt); color: var(--muted); font-size:10.5px; font-weight:800;
+    flex:1; padding:7px 4px; border-radius:9px; border:none;
+    background: #fff; color: var(--muted); font-size:10px; font-weight:800;
     text-transform:uppercase; letter-spacing:0.02em;
   }
-  .quit-tag-btn.active-none{ background: var(--felt-light); color: var(--cream); border-color: var(--felt-lighter); }
-  .quit-tag-btn.active-early{ background: var(--orange); color:#2b1a06; border-color: var(--orange); }
-  .quit-tag-btn.active-late{ background: var(--red); color:#fff; border-color: var(--red); }
+  .quit-tag-btn.active-none{ background: var(--primary-tint); color: var(--primary); }
+  .quit-tag-btn.active-early{ background: var(--orange); color:#fff; }
+  .quit-tag-btn.active-late{ background: var(--neg); color:#fff; }
 
   /* ---------- Scoreboard ---------- */
-  .score-list .score-row{
-    display:flex; align-items:center; gap:10px; padding:12px 4px;
-    border-bottom: 1px solid var(--line); cursor:pointer;
+  .sb-head{ display:flex; align-items:center; justify-content:space-between; padding: 4px 4px 12px 4px; }
+  .sb-head .t1{ font-size:12px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink); }
+  .sb-head .t2{ font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); }
+
+  .player-card{
+    background: var(--card); border: 2px solid var(--card-border);
+    border-radius: 18px; padding: 12px 14px; margin-bottom:8px;
+    box-shadow: 0 2px 10px rgba(20,22,43,0.04);
   }
-  .score-list .score-row:active{ background: rgba(212,175,55,0.06); }
-  .score-list .score-row:last-child{ border-bottom:none; }
-  .score-rank{ width:20px; font-size:12px; color: var(--muted); font-weight:700; flex-shrink:0; }
-  .score-list .pname{ flex:1; font-weight:700; font-size:14px; color:var(--cream); display:flex; align-items:center; gap:6px;}
-  .score-val{
-    font-variant-numeric: tabular-nums; font-weight:800; font-size:16px; min-width:52px; text-align:right;
+  .player-card.leader{ border-color: var(--primary); }
+  .pc-top{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .rank-badge{
+    width:26px; height:26px; border-radius:50%; flex-shrink:0;
+    background: #F0F0F5; color: var(--ink); font-weight:800; font-size:12px;
+    display:flex; align-items:center; justify-content:center;
   }
-  .score-val.pos{ color: var(--green-pos); }
-  .score-val.neg{ color: var(--red); }
-  .score-val.zero{ color: var(--cream); }
-  .crown{ font-size:13px; }
-  .chev{ color: var(--muted); font-size:14px; flex-shrink:0; }
+  .player-card.leader .rank-badge{ background: var(--primary); color:#fff; }
+  .pc-name{ flex:1; min-width:0; font-size:16px; font-weight:800; color:var(--ink); }
+  .pc-score{ font-size:22px; font-weight:900; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .player-card.leader .pc-score{ color: var(--primary); }
+  .pc-pills{ display:flex; flex-wrap:wrap; gap:6px; }
+  .pill{
+    padding: 5px 12px; border-radius: 999px; font-size:12px; font-weight:800;
+    color:#fff; font-variant-numeric: tabular-nums;
+  }
+  .pill.pos{ background: var(--pos); }
+  .pill.neg{ background: var(--neg); }
+  .pc-empty{ font-size:12px; color: var(--muted); font-style:italic; }
 
   /* ---------- History ---------- */
   .history-entry{
-    border-bottom:1px solid var(--line); padding:12px 0; font-size:13px;
+    border-bottom:1px solid var(--card-border); padding:12px 0; font-size:13px;
   }
   .history-entry:last-child{ border-bottom:none; }
-  .history-entry .h-top{ display:flex; justify-content:space-between; align-items:center; font-weight:700; color:var(--gold); margin-bottom:4px;}
+  .history-entry .h-top{ display:flex; justify-content:space-between; align-items:center; font-weight:800; color:var(--primary); margin-bottom:4px;}
   .history-entry .h-top .h-edit{
-    background: var(--felt-light); border:1px solid var(--line); color:var(--cream);
-    font-size:10px; text-transform:uppercase; font-weight:700; padding:5px 9px; border-radius:7px;
+    background: var(--primary-tint); border:none; color:var(--primary);
+    font-size:10px; text-transform:uppercase; font-weight:800; padding:6px 10px; border-radius:8px;
   }
   .history-entry .h-line{ color: var(--muted); margin:2px 0;}
-  .history-entry .h-line b{ color: var(--cream); font-weight:700;}
+  .history-entry .h-line b{ color: var(--ink); font-weight:700;}
   .empty-state{ text-align:center; padding: 30px 10px; color: var(--muted); font-size:13px; }
   .empty-state .big{ font-size:30px; margin-bottom:8px; }
 
   /* ---------- Player detail ---------- */
   .pd-summary{ display:flex; gap:10px; margin-bottom:16px; }
-  .pd-stat{ flex:1; background: var(--felt-dark); border:1px solid var(--line); border-radius:12px; padding:12px; text-align:center;}
-  .pd-stat .num{ font-size:20px; font-weight:800; color: var(--gold); font-variant-numeric: tabular-nums;}
-  .pd-stat .lbl{ font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:0.06em; margin-top:2px;}
-  .pd-row{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line); font-size:13px;}
+  .pd-stat{ flex:1; background: #FAFAFD; border:1.5px solid var(--card-border); border-radius:14px; padding:12px; text-align:center;}
+  .pd-stat .num{ font-size:20px; font-weight:900; color: var(--primary); font-variant-numeric: tabular-nums;}
+  .pd-stat .lbl{ font-size:10px; text-transform:uppercase; color:var(--muted); letter-spacing:0.06em; margin-top:2px; font-weight:700;}
+  .pd-row{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--card-border); font-size:13px;}
   .pd-row:last-child{ border-bottom:none; }
-  .pd-game{ width:78px; flex-shrink:0; color:var(--muted); font-size:11px; line-height:1.4;}
-  .pd-game b{ color:var(--cream); display:block; font-size:13px;}
+  .pd-game{ width:70px; flex-shrink:0; color:var(--muted); font-size:11px; line-height:1.4;}
+  .pd-game b{ color:var(--ink); display:block; font-size:13px;}
   .pd-mid{ flex:1; min-width:0; }
-  .pd-delta{ font-weight:800; font-variant-numeric: tabular-nums; min-width:50px; text-align:right;}
+  .pd-delta{ font-weight:800; font-variant-numeric: tabular-nums; min-width:46px; text-align:right;}
+  .pd-total{ font-size:11px; color:var(--muted); min-width:64px; text-align:right;}
+  .pd-edit-ic{ font-size:13px; color: var(--primary); flex-shrink:0; margin-left:2px; }
 
-  /* ---------- Modal ---------- */
+  /* ---------- Modal / Sheet ---------- */
   .overlay{
-    position:fixed; inset:0; background:rgba(4,20,15,0.72);
+    position:fixed; inset:0; background:rgba(20,22,43,0.45);
     display:none; align-items:flex-end; justify-content:center; z-index:50;
   }
   .overlay.active{ display:flex; }
   .modal{
-    background: var(--felt); border-radius: 20px 20px 0 0;
-    border: 1px solid var(--line); border-bottom:none;
+    background: var(--bg); border-radius: 26px 26px 0 0;
     width:100%; max-width:560px; max-height:88vh; overflow-y:auto;
     padding: 18px 18px calc(24px + var(--safe-bottom)) 18px;
     animation: slideup .22s ease;
   }
   @keyframes slideup{ from{ transform:translateY(24px); opacity:0;} to{ transform:none; opacity:1;} }
   .modal-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
-  .modal-head h3{ margin:0; font-size:16px; text-transform:uppercase; letter-spacing:0.06em; color:var(--gold);}
+  .modal-head h3{ margin:0; font-size:15px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink); font-weight:800;}
+  .modal-close{
+    background: var(--card); border:none; color: var(--ink);
+    width:34px; height:34px; border-radius:50%; font-size:16px;
+    display:flex; align-items:center; justify-content:center;
+  }
 
   .field-note{ font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5;}
 
+  .menu-sheet-item{
+    display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+    background: var(--card); border:1.5px solid var(--card-border); border-radius:16px;
+    padding:14px 16px; font-size:14px; font-weight:700; color:var(--ink); margin-bottom:10px;
+  }
+  .menu-sheet-item .ic{ font-size:17px; width:22px; text-align:center; flex-shrink:0; color:var(--primary); }
+  .menu-sheet-item.danger .ic, .menu-sheet-item.danger{ color: var(--neg); }
+
   .toast{
     position:fixed; left:50%; transform:translateX(-50%);
-    bottom: calc(20px + var(--safe-bottom)); background: var(--gold); color:#1a1305;
-    padding:10px 18px; border-radius:999px; font-size:13px; font-weight:700;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.35); z-index: 80; opacity:0; pointer-events:none;
+    bottom: calc(96px + var(--safe-bottom)); background: var(--ink); color:#fff;
+    padding:11px 20px; border-radius:999px; font-size:13px; font-weight:700;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25); z-index: 80; opacity:0; pointer-events:none;
     transition: opacity .2s ease, transform .2s ease;
   }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(-4px); }
 
   .stack-gap > * + *{ margin-top:10px; }
-  .edit-player-row{ background: var(--felt-dark); border:1px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px;}
-  .edit-player-row .epr-name{ font-weight:700; font-size:14px; margin-bottom:8px; }
+  .edit-player-row{ background: #FAFAFD; border:1.5px solid var(--card-border); border-radius:14px; padding:10px; margin-bottom:8px;}
+  .edit-player-row .epr-name{ font-weight:800; font-size:14px; margin-bottom:8px; }
 
   ::-webkit-scrollbar{ width:0; height:0; }
 </style>
@@ -319,28 +323,21 @@
 <div class="app">
 
   <div class="topbar">
+    <div class="menu-spacer" id="menuSpacerLeft" style="display:none;"></div>
     <div class="brand">
-      <div class="brand-chip">H</div>
-      <div>
-        <div class="brand-name">Hurray</div>
-        <div class="brand-sub" id="gameSubLabel">Score Tracker</div>
-      </div>
+      <div class="brand-name">HURRAY!</div>
+      <div class="brand-sub" id="gameSubLabel">Score Master</div>
     </div>
-    <div class="topbar-actions" id="topActions" style="display:none;">
-      <button class="icon-btn" id="btnHistory" title="History">&#8801;</button>
-      <button class="icon-btn" id="btnSettings" title="Settings">&#9881;</button>
-    </div>
+    <button class="menu-btn" id="btnMenu" style="display:none;">&#9776;</button>
   </div>
 
   <main>
 
     <!-- ===================== SETUP SCREEN ===================== -->
     <section class="screen active" id="screen-setup">
-      <div class="suit-divider"><span class="marks">&spades; &hearts; &diams; &clubs;</span><span class="line"></span>New Session</div>
-
       <div class="card">
         <h2>Players</h2>
-        <p class="hint">7 cards each, 2 decks. Add 2 to 10 players in seating order &mdash; this order is also the dealing rotation. One round = one game per player (4 players = 4 games per round).</p>
+        <p class="hint">7 cards each, 2 decks. Add 2 to 10 players in seating order &mdash; this order is also the dealing rotation.</p>
         <div class="stepper">
           <button type="button" id="playerMinus">&minus;</button>
           <div class="count" id="playerCount">4</div>
@@ -351,8 +348,23 @@
 
       <div class="card">
         <h2>Who deals first?</h2>
-        <p class="hint">The dealer deals to everyone else, then rotates seat by seat after every game.</p>
+        <p class="hint">The dealer deals to everyone else, then rotates seat by seat after every round.</p>
         <select id="startDealerSelect"></select>
+      </div>
+
+      <div class="card">
+        <h2>Quit penalties</h2>
+        <p class="hint">Default points lost when a player is tagged as an early or late quit during a round. These just pre-fill the points box &mdash; you can still edit it before ending the round.</p>
+        <div class="row">
+          <div>
+            <label>Early quit</label>
+            <input type="number" id="earlyPenaltyInput" value="5" min="0">
+          </div>
+          <div>
+            <label>Late quit</label>
+            <input type="number" id="latePenaltyInput" value="10" min="0">
+          </div>
+        </div>
       </div>
 
       <button class="btn btn-primary" id="btnStartSession">Start Session</button>
@@ -361,58 +373,75 @@
     <!-- ===================== GAME SCREEN ===================== -->
     <section class="screen" id="screen-game">
 
-      <div class="suit-divider">
-        <span class="marks">&spades; &hearts; &diams; &clubs;</span>
-        <span class="line"></span>
-        <span class="rlabel" id="gameNoLabel">Round 1 &middot; Deal 1</span>
-      </div>
-
       <div class="dealer-banner">
-        <div class="dealer-chip">D</div>
-        <div class="dealer-text">
-          <div class="label">Dealer</div>
+        <div class="db-dealer">
+          <div class="db-label">Dealer</div>
           <div class="value" id="dealerName">&mdash;</div>
-          <div class="sub" id="firstTurnLabel">First turn: &mdash;</div>
+        </div>
+        <div class="db-round">
+          <div class="db-label">Round</div>
+          <div class="value" id="roundNumber">1</div>
         </div>
       </div>
+      <div class="db-sub" id="firstTurnLabel" style="margin:0 4px 10px 4px;">First turn: &mdash;</div>
 
       <div class="card" style="padding-bottom:8px;">
-        <h2>This game</h2>
-        <p class="hint">Tap <b>Won</b> on the player who showed and won. Everyone else types the points they're down, and can tag an early or late quit. The winner automatically collects the total.</p>
+        <div class="card-head">
+          <h2>This round</h2>
+          <button class="icon-mini" id="btnResetGame" title="Reset this round">&#8635;</button>
+        </div>
+        <p class="hint">Tap <b>Won</b> on the player who showed and won. Everyone else types the points they're down, and can tag an early or late quit.</p>
         <div id="gameStatusLine" class="status-line muted">No winner selected yet.</div>
         <div id="playersInPlay"></div>
       </div>
 
-      <div class="btn-row">
-        <button class="btn btn-secondary" id="btnResetGame">Reset</button>
-        <button class="btn btn-primary" id="btnFinishGame">End Game</button>
-      </div>
-
       <div class="card">
-        <h2>Scoreboard</h2>
-        <p class="hint" style="margin-bottom:8px;">Tap a player to see their full score history.</p>
-        <div class="score-list" id="scoreList"></div>
+        <div class="sb-head">
+          <span class="t1">Scoreboard</span>
+          <span class="t2">Highest score wins</span>
+        </div>
+        <div id="scoreList"></div>
       </div>
 
-      <button class="btn btn-ghost" id="btnEndSession" style="margin-top:4px;">End session</button>
+      <div style="height:6px;"></div>
     </section>
 
   </main>
+
+  <div class="fixed-bottom" id="endRoundBar" style="display:none;">
+    <div class="inner">
+      <button class="btn btn-dark" id="btnFinishGame">End Round</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MENU SHEET ===================== -->
+<div class="overlay" id="menuOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Menu</h3><button class="modal-close" id="closeMenuModal">&times;</button></div>
+    <button class="menu-sheet-item" id="menuHistory"><span class="ic">&#8801;</span> Round history</button>
+    <button class="menu-sheet-item" id="menuSettings"><span class="ic">&#9881;</span> Quit penalty settings</button>
+    <button class="menu-sheet-item" id="menuExport"><span class="ic">&#8681;</span> Save scores to file</button>
+    <button class="menu-sheet-item" id="menuImport"><span class="ic">&#8679;</span> Retrieve scores from file</button>
+    <input type="file" id="importFileInput" accept="application/json" style="display:none;">
+    <button class="menu-sheet-item" id="menuEndSession"><span class="ic">&#8618;</span> End session</button>
+    <button class="menu-sheet-item danger" id="menuResetSession"><span class="ic">&#128465;</span> Reset entire session</button>
+  </div>
 </div>
 
 <!-- ===================== HISTORY MODAL ===================== -->
 <div class="overlay" id="historyOverlay">
   <div class="modal">
-    <div class="modal-head"><h3>Game History</h3><button class="icon-btn" id="closeHistoryModal">&times;</button></div>
+    <div class="modal-head"><h3>Round History</h3><button class="modal-close" id="closeHistoryModal">&times;</button></div>
     <div id="historyList"></div>
-    <button class="btn btn-secondary" id="btnUndoLast" style="margin-top:14px;">Undo last game</button>
+    <button class="btn btn-secondary" id="btnUndoLast" style="margin-top:14px;">Undo last round</button>
   </div>
 </div>
 
 <!-- ===================== EDIT GAME MODAL ===================== -->
 <div class="overlay" id="editGameOverlay">
   <div class="modal">
-    <div class="modal-head"><h3 id="editGameTitle">Edit Game</h3><button class="icon-btn" id="closeEditGameModal">&times;</button></div>
+    <div class="modal-head"><h3 id="editGameTitle">Edit Round</h3><button class="modal-close" id="closeEditGameModal">&times;</button></div>
     <label>Winner</label>
     <select id="editWinnerSelect"></select>
     <div id="editPlayerFields" style="margin-top:14px;"></div>
@@ -423,8 +452,9 @@
 <!-- ===================== PLAYER DETAIL MODAL ===================== -->
 <div class="overlay" id="playerDetailOverlay">
   <div class="modal">
-    <div class="modal-head"><h3 id="pdName">Player</h3><button class="icon-btn" id="closePlayerDetail">&times;</button></div>
+    <div class="modal-head"><h3 id="pdName">Player</h3><button class="modal-close" id="closePlayerDetail">&times;</button></div>
     <div class="pd-summary" id="pdSummary"></div>
+    <p class="field-note" style="margin-top:-6px; margin-bottom:12px;">Tap any round below to edit that player's score for just that game.</p>
     <div id="pdHistory"></div>
   </div>
 </div>
@@ -432,10 +462,13 @@
 <!-- ===================== SETTINGS MODAL ===================== -->
 <div class="overlay" id="settingsOverlay">
   <div class="modal">
-    <div class="modal-head"><h3>Settings</h3><button class="icon-btn" id="closeSettingsModal">&times;</button></div>
-    <p class="hint">Need to fix a misclick during the current hand? Use the <b>Reset</b> button on the game screen instead &mdash; it clears this game only and keeps your scoreboard intact.</p>
-    <button class="btn btn-danger" id="btnResetSession" style="margin-top:8px;">Reset entire session</button>
-    <p class="field-note">Clears all players, scores and history from this device.</p>
+    <div class="modal-head"><h3>Quit Penalty Settings</h3><button class="modal-close" id="closeSettingsModal">&times;</button></div>
+    <label>Early quit penalty</label>
+    <input type="number" id="settingsEarlyPenalty" min="0">
+    <label>Late quit penalty</label>
+    <input type="number" id="settingsLatePenalty" min="0">
+    <p class="field-note">These pre-fill the points box when you tag a player as an early or late quit &mdash; you can still edit the amount for any round.</p>
+    <button class="btn btn-primary" id="saveSettings" style="margin-top:14px;">Save settings</button>
   </div>
 </div>
 
@@ -446,7 +479,7 @@
   'use strict';
 
   /* ================= STORAGE HELPERS ================= */
-  var STORAGE_KEY = 'hurray_state_v3';
+  var STORAGE_KEY = 'hurray_state_v4';
 
   function safeSave(state){
     try{ window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
@@ -470,13 +503,14 @@
       setupPlayerCount: 4,
       setupNames: ['', '', '', ''],
       setupDealerIndex: 0,
+      settings: { earlyQuitPenalty: 5, lateQuitPenalty: 10 },
       started: false,
-      players: [],        // {id, name, score}
+      players: [],
       dealerIndex: 0,
       gameNumber: 1,
-      entries: {},          // playerId -> {points:Number, quit:'none'|'early'|'late'} for current game
-      winnerId: null,        // playerId of current game's winner
-      history: []             // completed games
+      entries: {},
+      winnerId: null,
+      history: []
     };
   }
 
@@ -484,6 +518,7 @@
     var loaded = safeLoad();
     state = loaded || defaultState();
     if(!state.entries){ state.entries = {}; }
+    if(!state.settings){ state.settings = { earlyQuitPenalty: 5, lateQuitPenalty: 10 }; }
   }
   function persist(){ safeSave(state); }
 
@@ -494,11 +529,6 @@
     if(cls){ e.className = cls; }
     if(html !== undefined){ e.innerHTML = html; }
     return e;
-  }
-  function initials(name){
-    var parts = name.trim().split(/\s+/);
-    if(parts.length === 1){ return parts[0].substring(0,2).toUpperCase(); }
-    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
   }
   function playerById(id){
     for(var i=0;i<state.players.length;i++){
@@ -527,14 +557,19 @@
   }
   function roundInfo(gameNumber, playerCount){
     var pc = playerCount > 0 ? playerCount : 1;
-    var roundNo = Math.floor((gameNumber - 1) / pc) + 1;
-    var dealInRound = ((gameNumber - 1) % pc) + 1;
-    return { round: roundNo, deal: dealInRound, of: pc };
+    var cycleNo = Math.floor((gameNumber - 1) / pc) + 1;
+    var dealInCycle = ((gameNumber - 1) % pc) + 1;
+    return { cycle: cycleNo, deal: dealInCycle, of: pc };
   }
   function quitLabel(quit){
     if(quit === 'early'){ return 'Early quit'; }
     if(quit === 'late'){ return 'Late quit'; }
     return '';
+  }
+  function initials(name){
+    var parts = name.trim().split(/\s+/);
+    if(parts.length === 1){ return parts[0].substring(0,2).toUpperCase(); }
+    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
   }
 
   /* ================= SETUP SCREEN ================= */
@@ -542,6 +577,8 @@
     $('playerCount').textContent = state.setupPlayerCount;
     renderNameInputs();
     renderDealerSelect();
+    $('earlyPenaltyInput').value = state.settings.earlyQuitPenalty;
+    $('latePenaltyInput').value = state.settings.lateQuitPenalty;
   }
 
   function renderNameInputs(){
@@ -593,6 +630,12 @@
   $('startDealerSelect').addEventListener('change', function(){
     state.setupDealerIndex = Number(this.value);
   });
+  $('earlyPenaltyInput').addEventListener('input', function(){
+    var v = Number(this.value); if(v >= 0){ state.settings.earlyQuitPenalty = v; }
+  });
+  $('latePenaltyInput').addEventListener('input', function(){
+    var v = Number(this.value); if(v >= 0){ state.settings.lateQuitPenalty = v; }
+  });
 
   $('btnStartSession').addEventListener('click', function(){
     var names = [];
@@ -617,8 +660,10 @@
     state.entries = {};
     state.winnerId = null;
     persist();
-    $('topActions').style.display = 'flex';
+    $('btnMenu').style.display = 'flex';
+    $('menuSpacerLeft').style.display = 'block';
     $('gameSubLabel').textContent = state.players.length + ' players';
+    $('endRoundBar').style.display = 'block';
     showScreen('screen-game');
     renderGame();
   });
@@ -639,10 +684,10 @@
     state.entries = {};
     state.winnerId = null;
     renderGame();
-    toast('This game was reset');
+    toast('This round was reset');
   }
   $('btnResetGame').addEventListener('click', function(){
-    if(window.confirm('Clear all points entered for this game so far?')){
+    if(window.confirm('Clear all points entered for this round so far?')){
       resetCurrentGame();
     }
   });
@@ -659,10 +704,10 @@
   function renderGame(){
     var dealer = state.players[state.dealerIndex];
     $('dealerName').textContent = dealer.name;
+    $('roundNumber').textContent = state.gameNumber;
     var ri = roundInfo(state.gameNumber, state.players.length);
-    $('gameNoLabel').textContent = 'Round ' + ri.round + ' \u00b7 Deal ' + ri.deal + ' of ' + ri.of + ' (Game #' + state.gameNumber + ')';
     var order = turnOrder();
-    $('firstTurnLabel').textContent = 'First turn: ' + (order.length ? order[0].name : '\u2014');
+    $('firstTurnLabel').textContent = 'First turn: ' + (order.length ? order[0].name : '\u2014') + ' \u00b7 Cycle ' + ri.cycle + ', deal ' + ri.deal + ' of ' + ri.of;
 
     var wrap = $('playersInPlay');
     wrap.innerHTML = '';
@@ -752,7 +797,7 @@
     var winner = playerById(state.winnerId);
     var gain = computeWinnerGain();
     line.className = 'status-line';
-    line.innerHTML = '<b>' + escapeHtml(winner.name) + '</b> will collect <b>' + gain + ' pts</b> \u2014 the sum of everyone else\u2019s points this game.';
+    line.innerHTML = '<b>' + escapeHtml(winner.name) + '</b> will collect <b>' + gain + ' pts</b> \u2014 the sum of everyone else\u2019s points this round.';
   }
 
   function bindDynamicButtons(){
@@ -778,6 +823,8 @@
         var val = this.getAttribute('data-tag-val');
         if(!state.entries[pid]){ state.entries[pid] = emptyEntry(); }
         state.entries[pid].quit = val;
+        if(val === 'early'){ state.entries[pid].points = state.settings.earlyQuitPenalty; }
+        else if(val === 'late'){ state.entries[pid].points = state.settings.lateQuitPenalty; }
         renderGame();
       });
     }
@@ -794,7 +841,7 @@
     }
   }
 
-  /* ---- finish game (End Game) ---- */
+  /* ---- finish round (End Round) ---- */
   $('btnFinishGame').addEventListener('click', function(){
     if(!state.winnerId){
       toast('Select a winner first (tap "Won")');
@@ -845,22 +892,36 @@
     var topScore = sorted.length ? sorted[0].score : 0;
     for(var i=0;i<sorted.length;i++){
       var p = sorted[i];
-      var row = el('div', 'score-row');
-      row.setAttribute('data-player-id', p.id);
-      row.appendChild(el('div', 'score-rank', String(i+1)));
-      var nameDiv = el('div', 'pname', escapeHtml(p.name));
-      if(p.score === topScore && topScore !== 0){
-        nameDiv.appendChild(el('span','crown','\uD83D\uDC51'));
+      var isLeader = (p.score === topScore && topScore !== 0);
+      var card = el('div', 'player-card' + (isLeader ? ' leader' : ''));
+      card.setAttribute('data-player-id', p.id);
+
+      var top = el('div','pc-top');
+      top.appendChild(el('div','rank-badge', String(i+1)));
+      top.appendChild(el('div','pc-name', escapeHtml(p.name)));
+      top.appendChild(el('div','pc-score', (p.score > 0 ? '+' : '') + p.score));
+      card.appendChild(top);
+
+      var pills = el('div','pc-pills');
+      var any = false;
+      for(var g=0;g<state.history.length;g++){
+        var h = state.history[g];
+        if(h.deltas.hasOwnProperty(p.id)){
+          any = true;
+          var d = h.deltas[p.id];
+          var pillCls = d >= 0 ? 'pill pos' : 'pill neg';
+          pills.appendChild(el('span', pillCls, (d > 0 ? '+' : '') + d));
+        }
       }
-      row.appendChild(nameDiv);
-      var cls = 'score-val ' + (p.score > 0 ? 'pos' : (p.score < 0 ? 'neg' : 'zero'));
-      row.appendChild(el('div', cls, (p.score > 0 ? '+' : '') + p.score));
-      row.appendChild(el('div','chev','\u203A'));
-      list.appendChild(row);
+      if(!any){
+        pills.appendChild(el('div','pc-empty','No rounds played yet'));
+      }
+      card.appendChild(pills);
+      list.appendChild(card);
     }
-    var rows = list.querySelectorAll('[data-player-id]');
-    for(var r=0;r<rows.length;r++){
-      rows[r].addEventListener('click', function(){
+    var cards = list.querySelectorAll('[data-player-id]');
+    for(var r=0;r<cards.length;r++){
+      cards[r].addEventListener('click', function(){
         openPlayerDetail(this.getAttribute('data-player-id'));
       });
     }
@@ -875,38 +936,41 @@
     var games = [];
     for(var i=0;i<state.history.length;i++){
       var h = state.history[i];
-      if(h.deltas.hasOwnProperty(playerId)){ games.push(h); }
+      if(h.deltas.hasOwnProperty(playerId)){ games.push({ h: h, idx: i }); }
     }
 
     var wins = 0;
-    for(var w=0;w<games.length;w++){ if(games[w].winnerId === playerId){ wins++; } }
+    for(var w=0;w<games.length;w++){ if(games[w].h.winnerId === playerId){ wins++; } }
 
     var summary = $('pdSummary');
     summary.innerHTML = '';
     summary.appendChild(el('div','pd-stat','<div class="num">' + (p.score > 0 ? '+' : '') + p.score + '</div><div class="lbl">Total score</div>'));
-    summary.appendChild(el('div','pd-stat','<div class="num">' + games.length + '</div><div class="lbl">Games played</div>'));
-    summary.appendChild(el('div','pd-stat','<div class="num">' + wins + '</div><div class="lbl">Games won</div>'));
+    summary.appendChild(el('div','pd-stat','<div class="num">' + games.length + '</div><div class="lbl">Rounds played</div>'));
+    summary.appendChild(el('div','pd-stat','<div class="num">' + wins + '</div><div class="lbl">Rounds won</div>'));
 
     var wrap = $('pdHistory');
     wrap.innerHTML = '';
     if(games.length === 0){
-      wrap.appendChild(el('div','empty-state','<div class="big">&#127183;</div>No games recorded yet.'));
+      wrap.appendChild(el('div','empty-state','<div class="big">&#127183;</div>No rounds recorded yet.'));
       openModal('playerDetailOverlay');
       return;
     }
 
     var running = 0;
     for(var g=0;g<games.length;g++){
-      var h2 = games[g];
+      var h2 = games[g].h;
+      var histIdx = games[g].idx;
       var delta = h2.deltas[playerId];
       running = round2(running + delta);
       var ri = roundInfo(h2.gameNumber, h2.playerCountAtTime || state.players.length);
       var row = el('div','pd-row');
-      row.appendChild(el('div','pd-game','R' + ri.round + ' \u00b7 D' + ri.deal + '<b>#' + h2.gameNumber + '</b>'));
+      row.style.cursor = 'pointer';
+      row.setAttribute('data-pd-edit-idx', String(histIdx));
+      row.appendChild(el('div','pd-game','C' + ri.cycle + ' \u00b7 D' + ri.deal + '<b>#' + h2.gameNumber + '</b>'));
 
       var mid = el('div','pd-mid');
       if(h2.winnerId === playerId){
-        mid.innerHTML = '<b style="color:var(--green-pos);">Won this game</b>';
+        mid.innerHTML = '<b style="color:var(--pos);">Won this round</b>';
       } else {
         var eDetail = null;
         for(var e=0;e<h2.entries.length;e++){
@@ -917,30 +981,130 @@
       }
       row.appendChild(mid);
 
-      var deltaCls = delta > 0 ? 'pd-delta pos' : (delta < 0 ? 'pd-delta neg' : 'pd-delta zero');
-      var deltaColor = delta > 0 ? 'var(--green-pos)' : (delta < 0 ? 'var(--red)' : 'var(--cream)');
+      var deltaColor = delta > 0 ? 'var(--pos)' : (delta < 0 ? 'var(--neg)' : 'var(--ink)');
       var deltaDiv = el('div','pd-delta', (delta > 0 ? '+' : '') + delta);
       deltaDiv.style.color = deltaColor;
       row.appendChild(deltaDiv);
-      row.appendChild(el('div','', 'Total ' + (running>0?'+':'') + running + ''));
+      row.appendChild(el('div','pd-total', 'Tot ' + (running>0?'+':'') + running));
+      row.appendChild(el('div','pd-edit-ic', '&#9998;'));
       wrap.appendChild(row);
+    }
+    var pdEditRows = wrap.querySelectorAll('[data-pd-edit-idx]');
+    for(var pr=0; pr<pdEditRows.length; pr++){
+      pdEditRows[pr].addEventListener('click', function(){
+        var idx = Number(this.getAttribute('data-pd-edit-idx'));
+        closeModal('playerDetailOverlay');
+        openEditGame(idx);
+      });
     }
     openModal('playerDetailOverlay');
   }
   $('closePlayerDetail').addEventListener('click', function(){ closeModal('playerDetailOverlay'); });
 
-  /* ================= HISTORY MODAL ================= */
-  $('btnHistory').addEventListener('click', function(){
+  /* ================= MENU SHEET ================= */
+  $('btnMenu').addEventListener('click', function(){ openModal('menuOverlay'); });
+  $('closeMenuModal').addEventListener('click', function(){ closeModal('menuOverlay'); });
+  $('menuHistory').addEventListener('click', function(){
+    closeModal('menuOverlay');
     renderHistory();
     openModal('historyOverlay');
   });
+  $('menuSettings').addEventListener('click', function(){
+    closeModal('menuOverlay');
+    $('settingsEarlyPenalty').value = state.settings.earlyQuitPenalty;
+    $('settingsLatePenalty').value = state.settings.lateQuitPenalty;
+    openModal('settingsOverlay');
+  });
+  $('menuEndSession').addEventListener('click', function(){
+    closeModal('menuOverlay');
+    if(window.confirm('End this session? Your scoreboard and history will remain until you reset.')){
+      showScreen('screen-setup');
+      $('endRoundBar').style.display = 'none';
+      state.setupPlayerCount = state.players.length;
+      state.setupNames = state.players.map(function(p){ return p.name; });
+      renderSetup();
+    }
+  });
+  $('menuResetSession').addEventListener('click', function(){
+    closeModal('menuOverlay');
+    if(window.confirm('This clears all players, scores and history from this device. Continue?')){
+      safeClear();
+      state = defaultState();
+      persist();
+      $('btnMenu').style.display = 'none';
+      $('menuSpacerLeft').style.display = 'none';
+      $('endRoundBar').style.display = 'none';
+      $('gameSubLabel').textContent = 'Score Master';
+      showScreen('screen-setup');
+      renderSetup();
+      toast('Session reset');
+    }
+  });
+
+  $('menuExport').addEventListener('click', function(){
+    closeModal('menuOverlay');
+    try{
+      var payload = JSON.stringify(state, null, 2);
+      var blob = new Blob([payload], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      var stamp = new Date().toISOString().slice(0,10);
+      a.href = url;
+      a.download = 'hurray-scores-' + stamp + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+      toast('Scores saved to file');
+    }catch(e){
+      toast('Could not save file on this device');
+    }
+  });
+  $('menuImport').addEventListener('click', function(){
+    closeModal('menuOverlay');
+    $('importFileInput').value = '';
+    $('importFileInput').click();
+  });
+  $('importFileInput').addEventListener('change', function(){
+    var file = this.files && this.files[0];
+    if(!file){ return; }
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var loaded = JSON.parse(reader.result);
+        if(!loaded || !loaded.players){ throw new Error('bad file'); }
+        if(!window.confirm('Retrieve scores from this file? This replaces everything currently on this device.')){ return; }
+        state = loaded;
+        if(!state.entries){ state.entries = {}; }
+        if(!state.settings){ state.settings = { earlyQuitPenalty: 5, lateQuitPenalty: 10 }; }
+        persist();
+        if(state.started && state.players.length >= 2){
+          $('btnMenu').style.display = 'flex';
+          $('menuSpacerLeft').style.display = 'block';
+          $('endRoundBar').style.display = 'block';
+          $('gameSubLabel').textContent = state.players.length + ' players';
+          showScreen('screen-game');
+          renderGame();
+        } else {
+          showScreen('screen-setup');
+          renderSetup();
+        }
+        toast('Scores retrieved from file');
+      }catch(e){
+        toast('That file could not be read');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  /* ================= HISTORY MODAL ================= */
   $('closeHistoryModal').addEventListener('click', function(){ closeModal('historyOverlay'); });
 
   function renderHistory(){
     var wrap = $('historyList');
     wrap.innerHTML = '';
     if(state.history.length === 0){
-      wrap.appendChild(el('div','empty-state','<div class="big">&#127183;</div>No games recorded yet.'));
+      wrap.appendChild(el('div','empty-state','<div class="big">&#127183;</div>No rounds recorded yet.'));
       $('btnUndoLast').style.display = 'none';
       return;
     }
@@ -951,7 +1115,7 @@
         var ri = roundInfo(h.gameNumber, h.playerCountAtTime || state.players.length);
         var entry = el('div','history-entry');
         var top = el('div','h-top');
-        var titleSpan = el('span','', 'R' + ri.round + ' \u00b7 D' + ri.deal + ' \u2014 Game #' + h.gameNumber);
+        var titleSpan = el('span','', 'Round #' + h.gameNumber + ' \u00b7 C' + ri.cycle + ' D' + ri.deal);
         var editBtn = el('button','h-edit','Edit');
         editBtn.setAttribute('data-edit-idx', String(idx));
         top.appendChild(titleSpan);
@@ -986,7 +1150,7 @@
     state.winnerId = null;
     renderHistory();
     renderGame();
-    toast('Last game undone');
+    toast('Last round undone');
   });
 
   function applyReverseDeltas(deltas){
@@ -1011,7 +1175,7 @@
   function openEditGame(idx){
     editingIndex = idx;
     var h = state.history[idx];
-    $('editGameTitle').textContent = 'Edit Game #' + h.gameNumber;
+    $('editGameTitle').textContent = 'Edit Round #' + h.gameNumber;
 
     var sel = $('editWinnerSelect');
     sel.innerHTML = '';
@@ -1081,6 +1245,11 @@
         }
         this.className = 'quit-tag-btn active-' + val;
         this.setAttribute('data-active','1');
+        if(val === 'early' || val === 'late'){
+          var penalty = val === 'early' ? state.settings.earlyQuitPenalty : state.settings.lateQuitPenalty;
+          var inputEl = this.parentNode.parentNode.querySelector('[data-edit-entry-id="' + pid + '"]');
+          if(inputEl){ inputEl.value = penalty ? String(penalty) : ''; }
+        }
       });
     }
   }
@@ -1092,7 +1261,6 @@
     var winner = playerById(winnerId);
     if(!winner){ return; }
 
-    // revert old deltas first
     applyReverseDeltas(h.deltas);
 
     var newDeltas = {};
@@ -1133,44 +1301,28 @@
     closeModal('editGameOverlay');
     renderHistory();
     renderGame();
-    toast('Game #' + h.gameNumber + ' updated');
+    toast('Round #' + h.gameNumber + ' updated');
   });
 
   /* ================= SETTINGS MODAL ================= */
-  $('btnSettings').addEventListener('click', function(){
-    openModal('settingsOverlay');
-  });
   $('closeSettingsModal').addEventListener('click', function(){ closeModal('settingsOverlay'); });
-  $('btnResetSession').addEventListener('click', function(){
-    if(window.confirm('This clears all players, scores and history from this device. Continue?')){
-      safeClear();
-      state = defaultState();
-      persist();
-      closeModal('settingsOverlay');
-      $('topActions').style.display = 'none';
-      $('gameSubLabel').textContent = 'Score Tracker';
-      showScreen('screen-setup');
-      renderSetup();
-      toast('Session reset');
-    }
-  });
-
-  /* ================= END SESSION ================= */
-  $('btnEndSession').addEventListener('click', function(){
-    if(window.confirm('End this session? Your scoreboard and history will remain until you reset.')){
-      $('topActions').style.display = 'flex';
-      showScreen('screen-setup');
-      state.setupPlayerCount = state.players.length;
-      state.setupNames = state.players.map(function(p){ return p.name; });
-      renderSetup();
-    }
+  $('saveSettings').addEventListener('click', function(){
+    var e = Number($('settingsEarlyPenalty').value);
+    var l = Number($('settingsLatePenalty').value);
+    if(e >= 0){ state.settings.earlyQuitPenalty = e; }
+    if(l >= 0){ state.settings.lateQuitPenalty = l; }
+    persist();
+    closeModal('settingsOverlay');
+    toast('Settings saved');
   });
 
   /* ================= INIT ================= */
   function init(){
     loadState();
     if(state.started && state.players.length >= 2){
-      $('topActions').style.display = 'flex';
+      $('btnMenu').style.display = 'flex';
+      $('menuSpacerLeft').style.display = 'block';
+      $('endRoundBar').style.display = 'block';
       $('gameSubLabel').textContent = state.players.length + ' players';
       showScreen('screen-game');
       renderGame();
