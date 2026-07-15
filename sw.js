@@ -1,7 +1,7 @@
 // Hurray Score Tracker - Service Worker
 // Cache-first strategy so the whole app works with zero network connection.
 
-var CACHE_NAME = 'hurray-cache-v5';
+var CACHE_NAME = 'hurray-cache-v11';
 var FILES_TO_CACHE = [
   './',
   './index.html',
